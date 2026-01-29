@@ -1,0 +1,210 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 主题变量定义 */
+:root {
+    /* 亮色模式 */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #e0e0e0;
+    --accent-color: #007bff;
+    
+    /* 按钮颜色 */
+    --btn-reset-bg: #f0f0f0;
+    --btn-reset-text: #333333;
+    --btn-reset-hover: #e0e0e0;
+    --btn-save-bg: #007bff;
+    --btn-save-text: #ffffff;
+    --btn-save-hover: #0056b3;
+    
+    /* 提示信息颜色 */
+    --success-bg: #d4edda;
+    --success-text: #155724;
+    --success-border: #c3e6cb;
+    --error-bg: #f8d7da;
+    --error-text: #721c24;
+    --error-border: #f5c6cb;
+}
+
+/* 深色模式变量 */
+html[data-theme="dark"] {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #e8e8e8;
+    --text-secondary: #b0b0b0;
+    --border-color: #404040;
+    --accent-color: #4a9eff;
+    
+    /* 按钮颜色 */
+    --btn-reset-bg: #404040;
+    --btn-reset-text: #e8e8e8;
+    --btn-reset-hover: #505050;
+    --btn-save-bg: #0056b3;
+    --btn-save-text: #ffffff;
+    --btn-save-hover: #004085;
+    
+    /* 提示信息颜色 */
+    --success-bg: #1e4620;
+    --success-text: #9ece8f;
+    --success-border: #2d5a2f;
+    --error-bg: #4a1c1c;
+    --error-text: #ff9999;
+    --error-border: #6d2d2d;
+}
+
+html, body {
+    width: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+inbody {
+    display: block;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-color: var(--bg-primary);
+}
+
+inbody h1 {
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+inbody p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 页脚样式 */
+footer {
+    background-color: #808080;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    width: 100%;
+    font-size: 14px;
+}
+
+/* 使页脚成为定位容器，便于齿轮相对于页脚定位 */
+footer { position: relative; }
+
+footer p {
+    color: white;
+    margin: 0;
+}
+
+/* 对话框样式 */
+        .dialog-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .dialog-box {
+            background: var(--bg-primary);
+            padding: 24px;
+            border-radius: 8px;
+            min-width: 300px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: dialogIn 0.3s ease-out;
+            color: var(--text-primary);
+        }
+
+        @keyframes dialogIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .dialog-title {
+            margin: 0 0 16px 0;
+            color: var(--text-primary);
+            font-size: 20px;
+        }
+
+        .dialog-content {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .dialog-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+
+.windows-notification {
+    position: fixed; right: 20px; bottom: 20px; width: 320px; border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 16px 16px 0 16px; min-height: 80px;
+    opacity: 0; transform: translateY(40px);
+    transition: transform .25s, opacity .25s;
+    border: 2px solid #b0b0b0;
+    background: #fff;
+    color: #222;
+}
+.windows-notification.night {
+    background: #23272e;
+    color: #eee;
+    border-color: #444;
+}
+.windows-notification.show { opacity: 1; transform: translateY(0);}
+.notification-title { font-weight: bold; margin-bottom: 8px;}
+.notification-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 8px;}
+.notification-progress { height: 3px; background: #e0e0e0; border-radius: 2px; width: 100%; position: absolute; left: 0; bottom: 0;}
+.windows-notification.night .notification-progress { background: #444; }
+.progress-fill { height: 100%; background: #0078d4; width: 100%; transition: width .05s;}
+.windows-notification.night .progress-fill { background: #4fa3ff; }
+.notification-timetip { position: absolute; right: 12px; bottom: 8px; font-size: 12px; color: #888;}
+.windows-notification.night .notification-timetip { color: #aaa; }
+
+/* 页脚右下角齿轮按钮 */
+.footer-gear {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: var(--btn-save-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+    z-index: 20;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.footer-gear:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
+.footer-gear:active { transform: translateY(0); }
+.footer-gear .gear-icon { font-size: 20px; line-height: 1; }
+
+html[data-theme="dark"] .footer-gear { background: var(--accent-color); color: var(--btn-save-text); }

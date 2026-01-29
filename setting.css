@@ -1,0 +1,117 @@
+.setting-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.setting-container h1 {
+    color: var(--text-primary);
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.setting-section {
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.setting-section h2 {
+    color: var(--text-primary);
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.setting-item {
+    margin-bottom: 15px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.setting-item select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.setting-item select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.setting-tip {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.setting-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-reset,
+.btn-save {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-reset {
+    background-color: var(--btn-reset-bg);
+    color: var(--btn-reset-text);
+}
+
+.btn-reset:hover {
+    background-color: var(--btn-reset-hover);
+}
+
+.btn-save {
+    background-color: var(--btn-save-bg);
+    color: var(--btn-save-text);
+}
+
+.btn-save:hover {
+    background-color: var(--btn-save-hover);
+}
+
+.setting-message {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.setting-message.success {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+}
+
+.setting-message.error {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
+}

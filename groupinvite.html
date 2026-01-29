@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加群验证</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="groupinvite.css">
+    <script>
+        // 在页面渲染前应用主题，避免闪烁
+        (function() {
+            const theme = localStorage.getItem('theme-preference') || 'system';
+            let isDark = false;
+            
+            if (theme === 'system') {
+                isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            } else if (theme === 'dark') {
+                isDark = true;
+            }
+            
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <inbody>
+        <div class="quiz-container">
+            <h1>加群验证</h1>
+            <p class="quiz-intro">想要加入群聊，需要满分通过四大关。</p>
+            <p class="quiz-stages">1.智力 2.情商 3.学历 4.常识</p>
+            <p class="quiz-tip">提示：学历关你可以使用AI作弊，其他关卡还需要辅助的可以找个楼跳了。</p>
+            
+            <div id="quiz-start" class="quiz-start">
+                <button id="start-btn" class="btn-start">开始验证</button>
+            </div>
+
+            <div id="quiz-content" class="quiz-content" style="display: none;">
+                <div id="stage-header" class="stage-header"></div>
+                <div id="error-message" class="error-message" style="display: none;"></div>
+                
+                <form id="quiz-form">
+                    <div id="questions-container"></div>
+
+                    <div class="quiz-buttons">
+                        <button type="button" id="prev-stage-btn" class="btn-nav" style="display: none;">上一关</button>
+                        <button type="button" id="next-stage-btn" class="btn-nav" style="display: none;">下一关</button>
+                        <button type="submit" id="submit-btn" class="btn-submit" style="display: none;">提交答卷</button>
+                    </div>
+                </form>
+
+                <div id="result" class="result-container" style="display: none;">
+                    <h2 id="result-title"></h2>
+                    <p id="result-message"></p>
+                    <button id="next-to-groups-btn" class="btn-start" style="display: none; margin-top: 20px;">下一步</button>
+                    <button id="retry-btn" class="btn-start" style="display: none; margin-top: 10px;">再次挑战</button>
+                </div>
+
+                <div id="groups-container" class="groups-container" style="display: none;">
+                    <div class="groups-header">
+                        <h2>群聊列表</h2>
+                    </div>
+                    <div class="groups-list">
+                        <div class="group-card">                            <img src="http://p.qlogo.cn/gh/849727851/849727851/100/" alt="MCD群" class="group-avatar">                            <div class="group-name">MCD</div>
+                            <div class="group-description">明面上是MC群，但聊什么都可以</div>
+                            <div class="group-arrow">→</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </inbody>
+
+    <footer></footer>
+
+    <!-- 群规弹窗 -->
+    <div id="group-rules-modal" class="modal" style="display: none;">
+        <div class="modal-content rules-modal-content">
+            <h3>群规</h3>
+            <div class="rules-text">
+                <p>1. 遵守国家法律法规</p>
+                <p>2. 禁止广告和垃圾信息</p>
+                <p>3. 尊重他人，文明聊天</p>
+                <p>4. 不讨论敏感政治话题</p>
+                <p>5. 禁止骚扰和人身攻击</p>
+                <p>6. 群主有最终解释权</p>
+                <p>7. 进群后在群公告查看详细群规</p>
+            </div>
+            <p class="rules-countdown" id="rules-countdown"></p>
+            <button id="confirm-rules-btn" class="btn-confirm">我已阅读，同意</button>
+        </div>
+    </div>
+
+    <!-- 群号弹窗 -->
+    <div id="group-number-modal" class="modal" style="display: none;">
+        <div class="modal-content number-modal-content">
+            <img src="http://p.qlogo.cn/gh/849727851/849727851/100/" alt="MCD群" class="modal-avatar">
+            <h3>MCD 群聊信息</h3>
+            <div class="group-info">
+                <p>群号：</p>
+                <div class="group-number">849727851</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-ok">OK</button>
+                <button class="btn-qq">拉起QQ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 反调试
+        (function() {
+            // 检查是否有debug cookie，如果有则跳过反调试
+            const debugCookie = document.cookie.split(';').some(cookie => cookie.trim().startsWith('debug='));
+            if (debugCookie) return;
+            
+            let devtools = { open: false };
+            const threshold = 160;
+            
+            setInterval(function() {
+                if (window.outerHeight - window.innerHeight > threshold ||
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        handleDevtoolsOpen();
+                    }
+                } else {
+                    if (devtools.open) {
+                        devtools.open = false;
+                        handleDevtoolsClosed();
+                    }
+                }
+            }, 500);
+            
+            function handleDevtoolsOpen() {
+                document.body.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 24px; color: red; text-align: center;"><div>检测到开发者工具已打开<br>请关闭开发者工具后重试</div></div>';
+                document.body.style.backgroundColor = '#fff';
+                throw new Error('Devtools opened!');
+            }
+            
+            function handleDevtoolsClosed() {
+                location.reload();
+            }
+            
+            // 右键菜单和快捷键也只在没有debug cookie时才禁用
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        })();
+
+        // 辅助函数
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 测验逻辑
+        class QuizManager {
+            constructor() {
+                this.currentStage = 0;
+                this.stages = [
+                    {
+                        name: '智力',
+                        description: '本关考验你的逻辑思维能力',
+                        questions: [
+                            {
+                                id: 'q1',
+                                text: '一个人从一个50米高的大厦上跳下来，为什么没死？',
+                                options: [
+                                    { text: '因为他站在一楼的窗口上', answer: true },
+                                    { text: '因为他有降落伞', answer: false },
+                                    { text: '因为他是超人', answer: false },
+                                    { text: '因为他很幸运', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q2',
+                                text: '驾驶员的老婆是谁？',
+                                options: [
+                                    { text: '保姆', answer: false },
+                                    { text: '司机的妻子', answer: true },
+                                    { text: '护士', answer: false },
+                                    { text: '医生的女友', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q3',
+                                text: '什么东西越洗越脏？',
+                                options: [
+                                    { text: '衣服', answer: false },
+                                    { text: '水', answer: true },
+                                    { text: '手', answer: false },
+                                    { text: '地板', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q4',
+                                text: '有2个毒药和2个解药你必须吃完，顺序如何？',
+                                options: [
+                                    { text: '毒、毒、解、解', answer: true },
+                                    { text: '解、毒、解、毒', answer: false },
+                                    { text: '毒、解、毒、解', answer: true },
+                                    { text: '解、解、毒、毒', answer: false }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: '情商',
+                        description: '本关考验你的社交和情感理解能力',
+                        questions: [
+                            {
+                                id: 'q5',
+                                text: '群里有人吵起来，你不能？',
+                                options: [
+                                    { text: '找管理', answer: false },
+                                    { text: '指责', answer: true },
+                                    { text: '围观', answer: false },
+                                    { text: '说理', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q6',
+                                text: '和别人意见不同(暂无确定的真理)，最合适的？',
+                                options: [
+                                    { text: '坚持自己的想法', answer: false },
+                                    { text: '尊重他人意见，寻找共识', answer: true },
+                                    { text: '打破砂锅问到底', answer: false },
+                                    { text: '放弃自己的想法', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q7',
+                                text: '你可以随意找群友索取财物吗？',
+                                options: [
+                                    { text: '疯狂星期四的梗可以玩，但别真要', answer: false },
+                                    { text: '要点小钱无所谓', answer: false },
+                                    { text: '不能，大家的钱都不是风刮来的', answer: true },
+                                    { text: '可以，我只是想乞讨', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q8',
+                                text: '找别人求助前"最"首先的事应当？',
+                                options: [
+                                    { text: '自己尝试解决', answer: true },
+                                    { text: '打钱', answer: true },
+                                    { text: '疯狂刷屏求助', answer: false },
+                                    { text: '问点无人知道的问题', answer: false }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: '学历',
+                        description: '本关考验你的学科知识',
+                        questions: [
+                            {
+                                id: 'q9',
+                                text: '选出(a+b)(b+c)的展开式',
+                                options: [
+                                    { text: 'a²+ab+b²+bc+c²+ac', answer: false },
+                                    { text: 'ab+b²+bc+ac', answer: true },
+                                    { text: 'a²+ab+ac+b²+2bc+c²', answer: false },
+                                    { text: 'ab+ac+b²+c²', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q10',
+                                text: '3的-1次方等于什么？',
+                                options: [
+                                    { text: '-3', answer: false },
+                                    { text: '1/3', answer: true },
+                                    { text: '0', answer: false },
+                                    { text: '3', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q11',
+                                text: '浮力和什么直接相关？',
+                                options: [
+                                    { text: '物体的密度', answer: false },
+                                    { text: '液体的密度和物体排开液体的体积', answer: true },
+                                    { text: '物体的重量', answer: false },
+                                    { text: '液体的深度', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q12',
+                                text: 'Δ(delta)代表什么？',
+                                options: [
+                                    { text: '圆周率', answer: false },
+                                    { text: '变化量或判别式', answer: true },
+                                    { text: '积分', answer: false },
+                                    { text: '求和', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q13',
+                                text: 'H₂O是什么物质？',
+                                options: [
+                                    { text: '过氧化氢', answer: false },
+                                    { text: '水', answer: true },
+                                    { text: '氧气', answer: false },
+                                    { text: '双氧水', answer: false }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: '常识',
+                        description: '本关考验你的生活常识和网络文化知识',
+                        questions: [
+                            {
+                                id: 'q14',
+                                text: '选择不属于压缩文件的后缀',
+                                options: [
+                                    { text: '.zip', answer: false },
+                                    { text: '.rar', answer: false },
+                                    { text: '.docx', answer: true },
+                                    { text: '.7z', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q15',
+                                text: '选择不是压缩工具的一项',
+                                options: [
+                                    { text: 'WinRAR', answer: false },
+                                    { text: '7-Zip', answer: false },
+                                    { text: 'VLC', answer: true },
+                                    { text: 'WinZip', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q16',
+                                text: '种子文件可以用什么打开？',
+                                options: [
+                                    { text: '迅雷', answer: true },
+                                    { text: '记事本', answer: false },
+                                    { text: '浏览器', answer: false },
+                                    { text: '计算器', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q17',
+                                text: 'Steam是什么？',
+                                options: [
+                                    { text: '蒸汽', answer: false },
+                                    { text: '游戏平台', answer: true },
+                                    { text: '科学计算器', answer: false },
+                                    { text: '聊天软件', answer: false }
+                                ]
+                            },
+                            {
+                                id: 'q18',
+                                text: '用兽音译者翻译"~呜嗷嗷嗷嗷呜呜呜嗷~呜嗷呜呜啊呜~啊啊嗷啊呜~呜~呜~嗷~呜嗷呜嗷嗷啊"得到的数字是？',
+                                options: [
+                                    { text: '0721', answer: true },
+                                    { text: '1234', answer: false },
+                                    { text: '5678', answer: false },
+                                    { text: '9012', answer: false }
+                                ]
+                            }
+                        ]
+                    }
+                ];
+                this.answers = {};
+                this.checkPassed();
+            }
+
+            checkPassed() {
+                // 检查是否已通过
+                const passed = CookieManager.get('quiz-passed');
+                if (passed === 'true') {
+                    document.getElementById('quiz-start').style.display = 'none';
+                    document.getElementById('quiz-content').style.display = 'block';
+                    document.getElementById('result').style.display = 'block';
+                    
+                    const resultTitle = document.getElementById('result-title');
+                    const resultMessage = document.getElementById('result-message');
+                    const nextBtn = document.getElementById('next-to-groups-btn');
+                    
+                    resultTitle.textContent = '🎉 已通过验证';
+                    resultMessage.textContent = `你已经通过了所有关卡！\n可以再次挑战来回味题目，或点击下一步进入群聊列表`;
+                    resultTitle.style.color = '#28a745';
+                    nextBtn.style.display = 'block';
+                    const retryBtn = document.getElementById('retry-btn');
+                    if (retryBtn) retryBtn.style.display = 'block';
+                }
+            }
+
+            init() {
+                document.getElementById('start-btn').addEventListener('click', () => this.startQuiz());
+                document.getElementById('prev-stage-btn').addEventListener('click', () => this.prevStage());
+                document.getElementById('next-stage-btn').addEventListener('click', () => this.nextStage());
+                document.getElementById('next-to-groups-btn').addEventListener('click', () => this.showGroupsList());
+                document.getElementById('quiz-form').addEventListener('submit', (e) => this.submitStage(e));
+                
+                // 群卡事件监听
+                const groupCard = document.querySelector('.group-card');
+                if (groupCard) {
+                    groupCard.addEventListener('click', () => this.selectGroup('MCD'));
+                }
+                
+                const confirmBtn = document.getElementById('confirm-rules-btn');
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', () => this.showGroupNumberModal());
+                }
+                
+                const okBtn = document.querySelector('.btn-ok');
+                if (okBtn) {
+                    okBtn.addEventListener('click', () => this.closeGroupNumberModal());
+                }
+                
+                const qqBtn = document.querySelector('.btn-qq');
+                if (qqBtn) {
+                    qqBtn.addEventListener('click', () => this.openQQ());
+                }
+                const retryBtn = document.getElementById('retry-btn');
+                if (retryBtn) retryBtn.addEventListener('click', () => this.restartQuiz());
+            }
+
+            startQuiz() {
+                document.getElementById('quiz-start').style.display = 'none';
+                document.getElementById('quiz-content').style.display = 'block';
+                this.showStage(0);
+            }
+
+            restartQuiz() {
+                // 清除通过状态并重置答题数据，回到开始界面
+                if (window.CookieManager && typeof CookieManager.remove === 'function') {
+                    CookieManager.remove('quiz-passed');
+                }
+                this.answers = {};
+                this.currentStage = 0;
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('groups-container').style.display = 'none';
+                document.getElementById('quiz-content').style.display = 'none';
+                document.getElementById('stage-header').style.display = 'none';
+                document.getElementById('quiz-start').style.display = 'block';
+            }
+
+            showStage(index) {
+                this.currentStage = index;
+                const stage = this.stages[index];
+                const container = document.getElementById('questions-container');
+                
+                // 显示关卡标题
+                document.getElementById('stage-header').innerHTML = `
+                    <div class="stage-title">第 ${index + 1} 关：${stage.name}</div>
+                    <div class="stage-description">${stage.description}</div>
+                `;
+                
+                // 隐藏错误消息
+                document.getElementById('error-message').style.display = 'none';
+                
+                // 清空容器
+                container.innerHTML = '';
+                
+                // 生成题目
+                stage.questions.forEach((q, qIndex) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-group';
+                    questionDiv.id = q.id;
+                    
+                    const shuffledOptions = shuffleArray(q.options);
+                    const letters = ['A', 'B', 'C', 'D'];
+                    
+                    let optionsHTML = shuffledOptions.map((option, idx) => {
+                        return `<label class="option-label"><input type="radio" name="${q.id}" value="${letters[idx]}" data-answer="${option.answer}"> ${letters[idx]}. ${option.text}</label>`;
+                    }).join('');
+                    
+                    questionDiv.innerHTML = `
+                        <div class="question">
+                            <p><strong>第${qIndex + 1}题：</strong>${q.text}</p>
+                            <div class="options">
+                                ${optionsHTML}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(questionDiv);
+                    
+                    // 恢复已保存的答案
+                    const savedAnswer = this.answers[q.id];
+                    if (savedAnswer) {
+                        document.querySelector(`input[name="${q.id}"][value="${savedAnswer}"]`).checked = true;
+                    }
+                });
+                
+                // 更新按钮状态
+                const prevBtn = document.getElementById('prev-stage-btn');
+                const nextBtn = document.getElementById('next-stage-btn');
+                const submitBtn = document.getElementById('submit-btn');
+                
+                prevBtn.style.display = index > 0 ? 'block' : 'none';
+                nextBtn.style.display = index < this.stages.length - 1 ? 'block' : 'none';
+                submitBtn.style.display = index === this.stages.length - 1 ? 'block' : 'none';
+            }
+
+            validateStage(stageIndex) {
+                const stage = this.stages[stageIndex];
+                let allCorrect = true;
+                const errorQuestions = [];
+                
+                stage.questions.forEach(q => {
+                    const selectedRadio = document.querySelector(`input[name="${q.id}"]:checked`);
+                    
+                    if (!selectedRadio) {
+                        allCorrect = false;
+                        this.highlightQuestion(q.id, false);
+                        errorQuestions.push(`第${stage.questions.indexOf(q) + 1}题`);
+                    } else {
+                        const isCorrect = selectedRadio.dataset.answer === 'true';
+                        if (isCorrect) {
+                            this.answers[q.id] = selectedRadio.value;
+                            this.highlightQuestion(q.id, true);
+                        } else {
+                            allCorrect = false;
+                            this.highlightQuestion(q.id, false);
+                            errorQuestions.push(`第${stage.questions.indexOf(q) + 1}题`);
+                        }
+                    }
+                });
+                
+                if (!allCorrect) {
+                    const errorMsg = document.getElementById('error-message');
+                    errorMsg.textContent = `${stage.name}关有误：${errorQuestions.join('、')}`;
+                    errorMsg.style.display = 'block';
+                    
+                    // 智力关有错显示非人类
+                    if (stageIndex === 0) {
+                        const nonHuman = document.createElement('div');
+                        nonHuman.className = 'non-human-message';
+                        nonHuman.textContent = '非人类';
+                        document.body.appendChild(nonHuman);
+                        setTimeout(() => nonHuman.remove(), 2000);
+                    }
+                } else {
+                    // 通过该关，显示调侃提示框（根据不同关卡显示不同内容）
+                    let taunt = '';
+                    if (stageIndex === 0) {
+                        taunt = '太好了，是人类！';
+                    } else if (stageIndex === 1) {
+                        taunt = '嗯...希望大伙合得来';
+                    } else if (stageIndex === 2) {
+                        taunt = '考的不是学历而是阅历！';
+                    } else if (stageIndex === 3) {
+                        taunt = '希望你别问些正常人知道的';
+                    }
+                    setTimeout(() => showWindowsNotification({title: '你过关！', content: taunt, duration: 3000}), 300);
+                }
+                
+                return allCorrect;
+            }
+
+            highlightQuestion(questionId, isCorrect) {
+                const questionDiv = document.getElementById(questionId);
+                if (isCorrect) {
+                    questionDiv.classList.add('correct');
+                    questionDiv.classList.remove('incorrect');
+                } else {
+                    questionDiv.classList.add('incorrect');
+                    questionDiv.classList.remove('correct');
+                }
+            }
+
+            prevStage() {
+                if (this.currentStage > 0) {
+                    this.showStage(this.currentStage - 1);
+                }
+            }
+
+            nextStage() {
+                if (this.validateStage(this.currentStage)) {
+                    if (this.currentStage < this.stages.length - 1) {
+                        this.showStage(this.currentStage + 1);
+                    } else {
+                        this.completeQuiz();
+                    }
+                }
+            }
+
+            submitStage(e) {
+                e.preventDefault();
+                
+                if (this.validateStage(this.currentStage)) {
+                    this.completeQuiz();
+                }
+            }
+
+            completeQuiz() {
+                // 保存通过状态到cookie（30天）
+                CookieManager.set('quiz-passed', 'true', 30);
+                
+                // 显示成功提示框
+                const totalQuestions = this.stages.reduce((sum, stage) => sum + stage.questions.length, 0);
+                showWindowsNotification({
+                    title: '🎉 恭喜',
+                    content: `你已完美通过所有四大关！\n共答对 ${totalQuestions} / ${totalQuestions} 题\n欢迎加入我们的群聊！`,
+                    duration: 4000
+                });
+                
+                document.getElementById('quiz-form').style.display = 'none';
+                document.getElementById('stage-header').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                
+                const resultTitle = document.getElementById('result-title');
+                const resultMessage = document.getElementById('result-message');
+                const nextBtn = document.getElementById('next-to-groups-btn');
+                
+                resultTitle.textContent = '🎉 恭喜！';
+                resultMessage.textContent = `你已完美通过所有四大关！\n共答对 ${totalQuestions} / ${totalQuestions} 题\n欢迎加入我们的群聊！`;
+                resultTitle.style.color = '#28a745';
+                nextBtn.style.display = 'block';
+                const retryBtn = document.getElementById('retry-btn');
+                if (retryBtn) retryBtn.style.display = 'block';
+            }
+
+            showGroupsList() {
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('groups-container').style.display = 'block';
+            }
+
+            selectGroup(groupName) {
+                if (groupName === 'MCD') {
+                    this.showGroupRulesModal();
+                }
+            }
+
+            showGroupRulesModal() {
+                const modal = document.getElementById('group-rules-modal');
+                const confirmBtn = document.getElementById('confirm-rules-btn');
+                const countdown = document.getElementById('rules-countdown');
+                
+                let seconds = 3;
+                modal.style.display = 'flex';
+                countdown.textContent = `(${seconds}秒后可点击)`;
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.style.cursor = 'not-allowed';
+                
+                const timer = setInterval(() => {
+                    seconds--;
+                    if (seconds > 0) {
+                        countdown.textContent = `(${seconds}秒后可点击)`;
+                    } else {
+                        countdown.textContent = '';
+                        confirmBtn.disabled = false;
+                        confirmBtn.style.opacity = '1';
+                        confirmBtn.style.cursor = 'pointer';
+                        clearInterval(timer);
+                    }
+                }, 1000);
+            }
+
+            showGroupNumberModal() {
+                document.getElementById('group-rules-modal').style.display = 'none';
+                document.getElementById('group-number-modal').style.display = 'flex';
+            }
+
+            closeGroupNumberModal() {
+                document.getElementById('group-number-modal').style.display = 'none';
+            }
+
+            openQQ() {
+                // 使用QQ群加群链接
+                const qqGroupUrl = 'https://qm.qq.com/cgi-bin/qm/qr?k=u9caISjpLIET6YaOKZT82vkZW-g-O-Fk&jump_from=webapi&authKey=oNZno4AoQvD81o5xqzxE52MRKNbMdn++H4k6z42Juy8TR/Dwb3ydPDRuRIxSwwmL';
+                window.location.href = qqGroupUrl;
+            }
+        }
+
+        window.quizManager = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保主题管理器已初始化
+            if (window.ThemeManager) {
+                ThemeManager.init();
+            }
+            
+            window.quizManager = new QuizManager();
+            window.quizManager.init();
+        });
+    </script>
+</body>
+</html>

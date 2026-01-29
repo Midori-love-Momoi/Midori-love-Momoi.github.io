@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - Modori</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="setting.css">
+</head>
+<body>
+    <inbody>
+        <div class="setting-container">
+            <h1>站点设置</h1>
+            
+            <div class="setting-section">
+                <h2>外观设置</h2>
+                <div class="setting-item">
+                    <label for="theme-select">深色模式：</label>
+                    <select id="theme-select">
+                        <option value="system">跟随系统（默认）</option>
+                        <option value="light">亮色模式</option>
+                        <option value="dark">深色模式</option>
+                    </select>
+                    <p class="setting-tip">当前系统主题：<span id="system-theme">亮色</span></p>
+                </div>
+            </div>
+
+            <div class="setting-actions">
+                <button id="reset-btn" class="btn-reset">重置为默认设置</button>
+                <button id="save-btn" class="btn-save">保存设置</button>
+            </div>
+
+            <div id="message" class="setting-message" style="display: none;"></div>
+        </div>
+    </inbody>
+
+    <footer></footer>
+
+    <script src="script.js"></script>
+    <script>
+        // 设置页面逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSelect = document.getElementById('theme-select');
+            const resetBtn = document.getElementById('reset-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const messageEl = document.getElementById('message');
+            
+            // 初始化选择器显示
+            function initializeUI() {
+                const currentTheme = ThemeManager.getCurrentTheme();
+                themeSelect.value = currentTheme;
+                ThemeManager.updateSystemThemeDisplay();
+            }
+            
+            // 显示消息
+            function showMessage(text, type = 'success') {
+                messageEl.textContent = text;
+                messageEl.className = `setting-message ${type}`;
+                messageEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 保存设置
+            saveBtn.addEventListener('click', function() {
+                const selectedTheme = themeSelect.value;
+                if (ThemeManager.setTheme(selectedTheme)) {
+                    showMessage('设置已保存！', 'success');
+                } else {
+                    showMessage('设置保存失败！', 'error');
+                }
+            });
+            
+            // 重置设置
+            resetBtn.addEventListener('click', function() {
+                if (confirm('确认要重置所有设置为默认值吗？')) {
+                    ThemeManager.reset();
+                    initializeUI();
+                    showMessage('已重置为默认设置', 'success');
+                }
+            });
+            
+            initializeUI();
+        });
+    </script>
+</body>
+</html>
